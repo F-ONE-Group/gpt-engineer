@@ -1,0 +1,5 @@
+Create a code that launches the calculator.exe in windows and prints out the results of 3 + 3. 
+follow the programming paradigms. 
+All the support functions should be created in utils.py script, while the main.py should remain as simple a possible.
+Once the result is available, send an email with a result to 'a.mosca@f-one.group'. 
+Use the f_one_core_utilities and the send_email_v3 for sending out the email.

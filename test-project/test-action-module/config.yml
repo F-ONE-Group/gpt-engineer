@@ -1,0 +1,8 @@
+name: "" # human-friendly name of the action module for logging
+topic: "" # camunda action topic to subscribe to
+parent robot repository: "f-one-core-template" # replace with the Github repo name of the parent robot
+parent robot branch: "master" # master is the standard
+path to variable schema: "processes/invoices" # path relative to the parent robot repository, excluding file name
+camunda ip: "localhost" # use localhost for same machine, or IP address of the Camunda server
+logger url: "http://127.0.0.1:4684" # include port 4684
+vault ip: "localhost"

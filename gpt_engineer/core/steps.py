@@ -69,6 +69,7 @@ from gpt_engineer.data.file_repository import FileRepositories
 from gpt_engineer.cli.file_selector import FILE_LIST_NAME, ask_for_files
 from gpt_engineer.cli.learning import human_review_input
 from gpt_engineer.data.code_vector_repository import CodeVectorRepository
+from gpt_engineer.data.chroma_vector_repository import ChromaVectorRepository
 
 MAX_SELF_HEAL_ATTEMPTS = 2  # constants for self healing code
 ASSUME_WORKING_TIMEOUT = 30
@@ -501,7 +502,7 @@ def vector_improve(ai: AI, dbs: FileRepositories):
     releventDocuments = code_vector_repository.relevent_code_chunks(dbs.input["prompt"])
 
     code_file_list = f"Here is a list of all the existing code files present in the root directory your code will be added to:"
-    code_file_list += "\n {fileRepositories.workspace.to_path_list_string()}"
+    code_file_list += "\n {dbs.workspace.to_path_list_string()}"
 
     relevent_file_contents = f"Here are files relevent to the query which you may like to change, reference or add to \n"
 
@@ -518,6 +519,50 @@ def vector_improve(ai: AI, dbs: FileRepositories):
 
     messages.append(HumanMessage(content=f"{code_file_list}"))
     messages.append(HumanMessage(content=f"{relevent_file_contents}"))
+    messages.append(HumanMessage(content=f"Request: {dbs.input['prompt']}"))
+
+    messages = ai.next(messages, step_name=curr_fn())
+
+    overwrite_files_with_edits(messages[-1].content.strip(), dbs)
+    return messages
+
+
+def vector_improve_f_one(ai: AI, dbs: FileRepositories):
+    code_vector_repository = CodeVectorRepository()
+    code_vector_repository.load_from_directory(dbs.workspace.path)
+    releventDocuments = code_vector_repository.relevent_code_chunks(dbs.input["prompt"])
+    code_file_list = f"Here is a list of all the existing code files present in the root directory your code will be added to:"
+    code_file_list += "\n {dbs.workspace.to_path_list_string()}"
+
+    relevent_file_contents = f"Here are files relevent to the query which you may like to change, reference or add to \n"
+    for doc in releventDocuments:
+        filename_without_path = Path(doc.metadata["filename"]).name
+        file_content = dbs.workspace[filename_without_path]
+        relevent_file_contents += format_file_to_input(
+            filename_without_path, file_content
+        )
+
+    chroma_vector_repository = ChromaVectorRepository()
+    chroma_vector_repository.load_from_chroma_collection(
+        collection_name="test", chroma_host="localhost", chroma_port=8003
+    )
+    chroma_relevant_documents = chroma_vector_repository.relevent_code_chunks(
+        dbs.input["prompt"]
+    )
+
+    relevant_chroma_content = (
+        "Here are the relevant information for using f_one_core_utilities package \n"
+    )
+    for doc in chroma_relevant_documents:
+        relevant_chroma_content += doc.get_content()
+
+    messages = [
+        SystemMessage(content=setup_sys_prompt_existing_code(dbs)),
+    ]
+
+    messages.append(HumanMessage(content=f"{code_file_list}"))
+    messages.append(HumanMessage(content=f"{relevent_file_contents}"))
+    messages.append(HumanMessage(content=f"{relevant_chroma_content}"))
     messages.append(HumanMessage(content=f"Request: {dbs.input['prompt']}"))
 
     messages = ai.next(messages, step_name=curr_fn())
@@ -809,7 +854,8 @@ STEPS = {
         get_improve_prompt,
         improve_existing_code,
     ],
-    Config.VECTOR_IMPROVE: [vector_improve],
+    # Config.VECTOR_IMPROVE: [vector_improve],
+    Config.VECTOR_IMPROVE: [vector_improve_f_one],
     Config.EVAL_IMPROVE_CODE: [assert_files_ready, improve_existing_code],
     Config.EVAL_NEW_CODE: [simple_gen],
     Config.SELF_HEAL: [self_heal],

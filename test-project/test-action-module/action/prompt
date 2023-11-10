@@ -1,0 +1,15 @@
+Your goal is to build a fully functional action module as an F-ONE developer.
+The project already contained the main structure and you goal is to complete the main.py, utils.py and constants.py with the code that it has been ask you to program. 
+The action module should use the process variables, already passed as Payload Object, and: 
+
+1) get the exchange rate at the process_variables.fhs_date of process_variable.currency using https://api.exchangerate.host/convert endpoint. 
+2) using the exchange rate for converting process_variables.estimate_amount_of_damage to the amount in EUR. This function should also return the ratio between the converted estimate_amount_of_damage and process_variables.claim_amount
+3) calculate elapsed days between process_variables.first_written_claim and process_variables.damage_date. If damage_date is None or process_variables.reason is investigation use process_variables.fhs_date
+4) process the business rules providing the process_variables. 
+the name of the rule should be follow the logic: 
+process_variables.client = Byrd then validation_rules_byrd
+process_variables.client = 7Senders then validation_rules_7s
+
+You need to use as much as possible the f_one_core_utilities package. Only if it is not possible to use one the available modules and methods, you can come up with your own function. 
+You need to use the already existing files utils.py and main.py available in the same folder.
+All the support functions should be created in utils.py script, while the main.py should remain as simple a possible.

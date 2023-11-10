@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  action_module_service: # choose a name of the service
+    image: <docker image>
+    environment:
+      - VAULT_TOKEN={{VAULT_TOKEN}}
+    networks:
+      - robot-network
+      - workflow-engine
+    command: python run.py
+    restart: always
+
+networks:
+  robot-network:
+    external: true
+  workflow-engine:
+    external: true

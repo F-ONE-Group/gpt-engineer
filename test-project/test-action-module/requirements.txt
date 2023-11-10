@@ -1,0 +1,4 @@
+action_module_support @ git+ssh://git@github.com/F-ONE-Group/action-module-support.git
+f_one_core_utilities @ git+ssh://git@github.com/F-ONE-Group/f-one-core-utilities.git
+pytest
+black

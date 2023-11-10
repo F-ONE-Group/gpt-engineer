@@ -1,0 +1,7 @@
+__pycache__
+.vscode/
+.vault/
+.venv/
+tmp_ocr/
+tmp*/
+log/
